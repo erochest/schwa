@@ -6,9 +6,7 @@ FLAGS=--enable-tests
 
 all: init test docs package
 
-init:
-	${CABAL} sandbox init
-	make deps
+init: deps
 
 test: build
 	${CABAL} test --test-option=--color
@@ -35,17 +33,11 @@ run:
 # deploy:
 # prep and push
 
-tags: ${SRC}
-	hasktags --ctags *.hs src
-
 hlint:
 	hlint *.hs src specs
 
 clean:
 	${CABAL} clean
-
-distclean: clean
-	${CABAL} sandbox delete
 
 configure: clean
 	${CABAL} configure ${FLAGS}
@@ -57,8 +49,8 @@ deps: clean
 build:
 	${CABAL} build
 
-restart: distclean init build
+restart: clean init build
 
 rebuild: clean configure build
 
-.PHONY: all init test run clean distclean configure deps build rebuild hlint
+.PHONY: all init test run clean configure deps build rebuild hlint

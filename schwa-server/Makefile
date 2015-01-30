@@ -1,4 +1,5 @@
 
+CABAL=cabal
 SRC=$(shell find src -name '*.hs')
 
 PORT=9090
@@ -6,7 +7,6 @@ PORT=9090
 all: init test docs package
 
 init:
-	${CABAL} sandbox init
 	make deps
 
 test: build
@@ -34,17 +34,11 @@ run:
 # deploy:
 # prep and push
 
-tags: ${SRC}
-	hasktags --ctags *.hs src
-
 hlint:
 	hlint *.hs src specs
 
 clean:
 	${CABAL} clean
-
-distclean: clean
-	${CABAL} sandbox delete
 
 configure: clean
 	yesod configure ${FLAGS}
@@ -56,8 +50,8 @@ deps: clean
 build:
 	yesod build
 
-restart: distclean init build
+restart: clean init build
 
 rebuild: clean configure build
 
-.PHONY: all init test run clean distclean configure deps build rebuild hlint
+.PHONY: all init test run clean configure deps build rebuild hlint
