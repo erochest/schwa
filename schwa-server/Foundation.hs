@@ -1,12 +1,17 @@
 module Foundation where
 
 import Import.NoFoundation
-import Database.Persist.Sql (ConnectionPool, runSqlPool)
-import Text.Hamlet          (hamletFile)
-import Text.Jasmine         (minifym)
-import Yesod.Auth.BrowserId (authBrowserId)
-import Yesod.Default.Util   (addStaticContentExternal)
-import Yesod.Core.Types     (Logger)
+import Database.Persist.Sql    (ConnectionPool, runSqlPool)
+import Text.Hamlet             (hamletFile)
+import Text.Jasmine            (minifym)
+import Yesod.Auth.BrowserId    (authBrowserId)
+#if DEVELOPMENT
+import Yesod.Auth.Dummy        (authDummy)
+#endif
+import Yesod.Auth.GoogleEmail2 (authGoogleEmail)
+import Yesod.Auth.OpenId       (authOpenId, IdentifierType(..))
+import Yesod.Default.Util      (addStaticContentExternal)
+import Yesod.Core.Types        (Logger)
 import qualified Yesod.Core.Unsafe as Unsafe
 
 -- | The foundation datatype for your application. This can be a good place to
@@ -132,7 +137,17 @@ instance YesodAuth App where
                     }
 
     -- You can add other plugins like BrowserID, email or OAuth here
-    authPlugins _ = [authBrowserId def]
+    authPlugins a = [ authBrowserId def
+#if DEVELOPMENT
+                    , authDummy
+#endif
+                    , authGoogleEmail googleClientId googleClientSecret
+                    , authOpenId Claimed []
+                    ]
+                    where
+                        settings           = appSettings a
+                        googleClientId     = appGoogleClientId settings
+                        googleClientSecret = appGoogleClientSecret settings
 
     authHttpManager = getHttpManager
 

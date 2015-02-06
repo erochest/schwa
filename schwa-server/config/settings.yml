@@ -27,3 +27,6 @@ database:
 
 copyright: © 2015 Eric Rochester
 #analytics: UA-YOURCODE
+
+google-client-id:     "_env:GOOGLE_CLIENT_ID:"
+google-client-secret: "_env:GOOGLE_CLIENT_SECRET:"

@@ -1,5 +1,14 @@
 <h1>Welcome to Yesod!
 
+$maybe (Entity _ user) <- auth
+  <p>You are #{userIdent user}. Why don't you #
+    <a href=@{AuthR LogoutR}>logout
+    ?
+$nothing
+  <p>Do you need to #
+    <a href=@{AuthR LoginR}>login
+    ?
+
 <ol>
   <li>Now that you have a working project you should use the #
     \<a href="http://www.yesodweb.com/book/">Yesod book<span class="glyphicon glyphicon-book"></span></a> to learn more. #
