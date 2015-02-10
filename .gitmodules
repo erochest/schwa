@@ -1,0 +1,3 @@
+[submodule "schwa-server"]
+	path = schwa-server
+	url = git@github.com:erochest/schwa-server.git
