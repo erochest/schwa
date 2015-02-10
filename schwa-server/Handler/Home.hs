@@ -18,8 +18,7 @@ getHomeR = do
         handlerName = "getHomeR" :: Text
     auth <- maybeAuth
     defaultLayout $ do
-        aDomId <- newIdent
-        setTitle "Welcome To Yesod!"
+        aDomId <- identTitle
         $(widgetFile "homepage")
 
 postHomeR :: Handler Html
@@ -32,9 +31,11 @@ postHomeR = do
 
     auth <- maybeAuth
     defaultLayout $ do
-        aDomId <- newIdent
-        setTitle "Welcome To Yesod!"
+        aDomId <- identTitle
         $(widgetFile "homepage")
+
+identTitle :: MonadWidget m => m Text
+identTitle = setTitle "Welcome to Yesod!" >> newIdent
 
 sampleForm :: Form (FileInfo, Text)
 sampleForm = renderBootstrap3 BootstrapBasicForm $ (,)
