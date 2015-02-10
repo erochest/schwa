@@ -82,7 +82,7 @@ library
                  , vector
                  , time
 
-executable         schwa-server
+executable         server
     if flag(library-only)
         Buildable: False
 
