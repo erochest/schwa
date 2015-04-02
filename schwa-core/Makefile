@@ -39,6 +39,8 @@ hlint:
 clean:
 	${CABAL} clean
 
+distclean: clean
+
 configure: clean
 	${CABAL} configure ${FLAGS}
 
