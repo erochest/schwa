@@ -128,3 +128,8 @@ test-suite test
                  , hspec >= 2.0.0
                  , classy-prelude
                  , classy-prelude-yesod
+
+
+source-repository head
+  type:                git
+  location:            git://github.com/erochest/schwa-server.git
