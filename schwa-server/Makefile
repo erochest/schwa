@@ -1,22 +1,23 @@
 
-SRC=$(shell find src -name '*.hs')
+SRC=$(shell find . -name '*.hs')
+BUILD_FLAGS=--flag schwa-server:dev
+# BUILD_FLAGS=
 
 PORT=9090
 
 all: init test docs package
 
-init:
-	${CABAL} sandbox init
-	make deps
+init: deps
 
-test: build
-	yesod test
+test:
+	stack test
 
 dev:
-	yesod devel --port=${PORT}
+	stack build --flag schwa-server:dev
+	make run
 
 run:
-	${CABAL} run
+	stack exec -- schwa-server
 
 
 # docs:
@@ -35,26 +36,21 @@ run:
 # prep and push
 
 tags: ${SRC}
-	hasktags --ctags *.hs src
+	codex update
 
 hlint:
 	hlint *.hs src specs
 
 clean:
-	${CABAL} clean
+	stack clean
 
 distclean: clean
-	${CABAL} sandbox delete
 
-configure: clean
-	yesod configure ${FLAGS}
-
-deps: clean
-	${CABAL} install --only-dependencies --allow-newer ${FLAGS}
-	make configure
+deps:
+	stack deps
 
 build:
-	yesod build
+	stack build $(BUILD_FLAGS)
 
 watch:
 	arion . src specs
