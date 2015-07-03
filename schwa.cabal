@@ -32,7 +32,7 @@ executable server
                      , text
                      , optparse-applicative
                      , Spock
-  -- hs-source-dirs:      .
+  hs-source-dirs:      src
   default-language:    Haskell2010
 
 test-suite schwa-specs
