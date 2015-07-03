@@ -56,4 +56,7 @@ restart: distclean init build
 
 rebuild: clean build
 
+create-app:
+	rhc app create schwa http://www.accursoft.com/cartridges/network.yml --no-scaling --from-code https://github.com/erochest/schwa.git --repo schwa-openshift --timeout 999999
+
 .PHONY: all init test run clean distclean build rebuild hlint watch tags
