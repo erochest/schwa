@@ -2,7 +2,7 @@
 SRC=$(shell find src -name '*.hs')
 
 CABAL=stack
-FLAGS=--enable-tests
+FLAGS=--enable-tests --pedantic
 
 all: init test docs package
 
