@@ -3,5 +3,9 @@
   "version": "0.0.0",
   "description": "A webapp for managing lexicograph pronunciations.",
   "license": "Apache"
+  "private": true,
+  "dependencies": {
+    "modernizr": "~2.8.1"
+  }
 }
 

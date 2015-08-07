@@ -5,3 +5,7 @@ node_modules/
 output/
 tmp/
 npm-debug.log
+dist
+.tmp
+.sass-cache
+test/bower_components
