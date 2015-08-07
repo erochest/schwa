@@ -33,7 +33,7 @@
     "gulp-useref": "^1.1.1",
     "main-bower-files": "^2.5.0",
     "opn": "^1.0.1",
-    "run-sequence": "^1.1.2"
+    "run-sequence": "^1.1.2",
     "wiredep": "^2.2.2"
   },
   "eslintConfig": {
