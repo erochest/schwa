@@ -16,8 +16,11 @@ const reload = browserSync.reload;
 
 const paths = {
   src: 'src/**/*.purs',
+  ffi: 'src/**/*.js',
   bowerSrc: 'bower_components/purescript-*/src/**/*.purs',
-  dest: './app/scripts',
+  bowerFfi: 'bower_components/purescript-*/src/**/*.js',
+  dest: './output',
+  dist: './app/scripts/main.js',
   docsDest: 'README.md',
   manifests: [
     'bower.json',
@@ -26,19 +29,21 @@ const paths = {
 };
 
 const options = {
-  compiler: {},
-  pscDocs: {}
+  compiler: {
+    src: [paths.src, paths.bowerSrc],
+    ffi: [paths.ffi, paths.bowerFfi]
+  },
+  bundle: {
+    src: paths.dest + '/**/*.js',
+    output: paths.dist
+  },
+  pscDocs: {
+    src: paths.src
+  }
 };
 
 function compile(compiler) {
-  var psc = compiler(options.compiler);
-  psc.on('error', (e) => {
-    console.error(e.message);
-    psc.end();
-  });
-  return gulp.src([paths.src, paths.bowerSrc])
-    .pipe(psc)
-    .pipe(gulp.dest(paths.dest));
+  return compiler(options.compiler);
 };
 
 function bumpType(type) {
@@ -65,35 +70,30 @@ gulp.task('bump-tag-minor', () => { return runSequence('bump-minor', 'tag'); });
 gulp.task('bump-tag-patch', () => { return runSequence('bump-patch', 'tag'); });
 
 gulp.task('make', () => {
-  return compile(purescript.pscMake);
+  return purescript.psc(options.compiler);
 });
 
-gulp.task('browser', () => {
-  return compile(purescript.psc);
+gulp.task('bundle', () => {
+  return purescript.pscBundle(options.bundle);
 });
+
+gulp.task('browser', ['make', 'bundle']);
 
 gulp.task('docs', () => {
-  var pscDocs = purescript.pscDocs(options.pscDocs);
-  pscDocs.on('error', (e) => {
-    console.error(e.message);
-    pscDocs.end();
-  });
-  return gulp.src(paths.src)
-    .pipe(pscDocs)
-    .pipe(gulp.dest(paths.docsDest));
+  return purescript.pscDocs(options.pscDocs);
 });
 
-gulp.task('dotPsci', () => {
-  gulp.src([paths.src].concat(paths.bowerSrc))
-    .pipe(purescript.dotPsci());
+gulp.task('dotpsci', () => {
+  return purescript.psci(options.compiler)
+    .pipe(gulp.dest('.'));
 });
 
 gulp.task('watch-browser', () => {
-  gulp.watch(paths.src, ['browser', 'docs']);
+  gulp.watch(paths.src, ['browser']);
 });
 
 gulp.task('watch-make', () => {
-  gulp.watch(paths.src, ['make', 'docs', 'dotPsci']);
+  gulp.watch(paths.src, ['make', 'dotPsci']);
 });
 
 gulp.task('styles', () => {
@@ -172,7 +172,7 @@ gulp.task('extras', () => {
     '!app/*.html'
   ], {
     dot: true
-  }).pipe(gulp.dest('dist'));
+  }).pipe(gulp.dest('dist/'));
 });
 
 gulp.task('clean', del.bind(null, ['.tmp', 'dist']));
@@ -199,7 +199,8 @@ gulp.task('serve', ['styles', 'fonts'], () => {
   gulp.watch('app/styles/**/*.scss', ['styles']);
   gulp.watch('app/fonts/**/*', ['fonts']);
   gulp.watch('bower.json', ['wiredep', 'fonts']);
-  gulp.watch(paths.src, ['browser', 'docs']);
+  gulp.watch(paths.src, ['browser']);
+  gulp.watch(paths.ffi, ['browser']);
 });
 
 gulp.task('serve:dist', () => {
@@ -229,6 +230,14 @@ gulp.task('serve:test', () => {
   gulp.watch('test/spec/**/*.js', ['lint:test']);
 });
 
+gulp.task('test', ['make'], () => {
+  return purescript.pscBundle({
+      src: paths.dest + '/**/*.js',
+      main: 'Test.Main'
+    })
+    .pipe(run('node'));
+});
+
 // inject bower components
 gulp.task('wiredep', () => {
   gulp.src('app/styles/*.scss')
@@ -244,7 +253,7 @@ gulp.task('wiredep', () => {
     .pipe(gulp.dest('app'));
 });
 
-gulp.task('build', ['lint', 'html', 'images', 'fonts', 'extras'], () => {
+gulp.task('build', ['html', 'images', 'fonts', 'extras'], () => {
   return gulp.src('dist/**/*').pipe($.size({title: 'build', gzip: true}));
 });
 
