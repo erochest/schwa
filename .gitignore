@@ -9,3 +9,4 @@ dist
 .tmp
 .sass-cache
 test/bower_components
+gh-pages/

@@ -4,12 +4,14 @@ import bump from 'gulp-bump';
 import filter from 'gulp-filter';
 import git from 'gulp-git';
 import purescript from 'gulp-purescript';
+import run from 'gulp-run';
 import runSequence from 'run-sequence';
 import tagVersion from 'gulp-tag-version';
 import gulpLoadPlugins from 'gulp-load-plugins';
 import browserSync from 'browser-sync';
 import del from 'del';
 import {stream as wiredep} from 'wiredep';
+import fs from 'fs';
 
 const $ = gulpLoadPlugins();
 const reload = browserSync.reload;
@@ -25,7 +27,8 @@ const paths = {
   manifests: [
     'bower.json',
     'package.json'
-  ]
+  ],
+  deploy: './gh-pages/',
 };
 
 const options = {
@@ -255,6 +258,50 @@ gulp.task('wiredep', () => {
 
 gulp.task('build', ['html', 'images', 'fonts', 'extras'], () => {
   return gulp.src('dist/**/*').pipe($.size({title: 'build', gzip: true}));
+});
+
+gulp.task('deploy', () => {
+  return runSequence(
+      'build'
+    //, 'test'
+    , 'deploy:push'
+    );
+});
+
+// There are async issues with this.
+gulp.task('deploy:reclone', () => {
+  del('./schwa/', { force: true });
+  del(paths.deploy, { force: true });
+  git.clone('git@github.com:erochest/schwa', { args: '-b gh-pages' }, (e) => {
+    console.error(e);
+  });
+});
+
+gulp.task('deploy:rename', ['deploy:reclone'], () => {
+  fs.renameSync('./schwa', paths.deploy);
+});
+
+gulp.task('deploy:add', ['deploy:rename'], () => {
+  gulp.src('./app/**/*', { dot: true })
+    .pipe(gulp.dest(paths.deploy));
+});
+
+gulp.task('deploy:commit', ['deploy:add'], () => {
+  gulp.src([paths.deploy + '/**/*', '!' + paths.deploy + '/.git/**/*'],
+    {
+      dot: true,
+      nodir: true
+    })
+    .pipe(git.add({
+      cwd: paths.deploy
+    }))
+    .pipe(git.commit('Deploy', {
+      cwd: paths.deploy
+    }));
+});
+
+gulp.task('deploy:push', ['deploy:commit'], () => {
+  return git.push('origin', 'gh-pages', { cwd: paths.deploy });
 });
 
 gulp.task('default', ['clean'], () => {
